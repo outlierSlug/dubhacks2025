@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import List
 from datetime import date, datetime, timedelta
+from abc import ABC, abstractmethod
 
 DURATION = 1 # Hours
 
@@ -75,12 +76,31 @@ class Event():
         return False
     
 
-    
-    
-    
+class DataBase(ABC):
+    @abstractmethod
+    def __init__():
+        pass
 
-    
-    
+    @abstractmethod
+    def add_player(Player):
+        pass
 
+    @abstractmethod
+    def remove_player(Player):
+        pass
 
-      
+    @abstractmethod
+    def add_event(Event) -> bool:
+        pass
+
+    @abstractmethod
+    def remove_event(Event) -> bool:
+        pass
+
+    @abstractmethod
+    def all_players() -> List[Player]:
+        pass
+
+    @abstractmethod
+    def all_events() -> List[Player]:
+        pass
