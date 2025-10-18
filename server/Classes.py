@@ -12,7 +12,7 @@ class Gender(Enum):
 
 
 class Player():
-    def __init__(self, id: int, fname: str, lname: str, rating: int, email: str, phone: str, bday: date, gender: Gender):
+    def __init__(self, id: int, fname: str, lname: str, rating: int, email: str, phone: str, bday: date, gender: int):
         self.id = id
         self.fname = fname
         self.lname = lname
@@ -35,8 +35,8 @@ class Player():
     def change_phone(self, phone: str):
         self.phone = phone
 
-    def change_gender(self, gender: Gender):
-        self.gender = Gender
+    def change_gender(self, gender: int):
+        self.gender = gender
 
     def update_rating(self, rating: int):
         self.rating = rating
@@ -104,3 +104,5 @@ class DataBase(ABC):
     @abstractmethod
     def all_events() -> List[Player]:
         pass
+
+      
