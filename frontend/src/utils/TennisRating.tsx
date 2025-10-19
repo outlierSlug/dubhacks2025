@@ -24,11 +24,14 @@ export class TennisRating {
     const competitionBonus = this.calculateCompetitionBonus(inputs.hasCompExperience);
     const compositeScore = baseScore + experienceBonus + competitionBonus;
 
+    let finalRating: number;
     if (inputs.utr === undefined) {
-      return Math.min(compositeScore, 70);
+      finalRating = Math.min(compositeScore, 70);
+    } else {
+      finalRating = this.calculateWithUTR(inputs.utr, compositeScore);
     }
 
-    return this.calculateWithUTR(inputs.utr, compositeScore);
+    return Number(finalRating.toFixed(2));
   }
 
   private static calculateBaseScore(skillLevel: number): number {
@@ -57,9 +60,13 @@ export class TennisRating {
   }
 
   private static getWeights(utr: number): { utr: number; composite: number } {
-    if (utr >= 4) {
-      return { utr: 0.5, composite: 0.5 };
-    }
-    return { utr: 0.2, composite: 0.8 };
-  }
+  if (utr >= 10) return { utr: 1, composite: 0 };
+
+  // Smooth transition between UTR 0 and 10
+  const utrWeight = Math.min(utr / 10, 1); // 0 → 1
+  const compositeWeight = 1 - utrWeight;
+
+  return { utr: utrWeight, composite: compositeWeight };
+ }
+ 
 }

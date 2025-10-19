@@ -1,0 +1,113 @@
+.profile-page {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    padding: 1.25rem;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: minmax(150px, auto) 1fr;
+    gap: 1rem 2rem;
+    align-items: start;
+}
+
+.profile-row {
+    display: contents;
+}
+
+.profile-row label {
+    font-weight: 600;
+    color: #333;
+    padding: 0.5rem 0;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.value {
+    padding: 0.5rem 0;
+    color: #555;
+}
+
+.input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.input.error {
+    border-color: crimson;
+}
+
+.error-message {
+    color: crimson;
+    font-size: 0.85rem;
+    margin-top: 2px;
+}
+
+select.input {
+    background-color: white;
+    height: 42px;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: #fff;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: #2563eb;
+    border: 1px solid #cfe0ff;
+}
+
+.status {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+/* Add these styles for better number input appearance */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
