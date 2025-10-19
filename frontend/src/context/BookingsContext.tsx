@@ -15,6 +15,7 @@ interface BookingsContextType {
   bookings: Booking[]
   loadMine: () => Promise<void>
   createBooking: (data: { startISO: string; timeSlot: string; court: number }) => Promise<Booking>
+  cancelBooking: (id: number) => Promise<void>
 }
 
 const BookingsContext = createContext<BookingsContextType | undefined>(undefined)
@@ -29,7 +30,11 @@ export function BookingsProvider({ children }: { children: ReactNode }) {
     const mapped = events.map((ev: any) => ({
       id: ev.id,
       dateISO: ev.start_time,
-      timeSlot: new Date(ev.start_time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }),
+      timeSlot: new Date(ev.start_time).toLocaleTimeString([], { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      }),
       court: ev.court,
       status: 'confirmed',
     }))
@@ -38,13 +43,15 @@ export function BookingsProvider({ children }: { children: ReactNode }) {
 
   const createBooking = async (data: { startISO: string; timeSlot: string; court: number }) => {
     if (!user?.id) throw new Error('Must be logged in')
+
+    const eventId = Date.now();
     
     // Create the event
     const event = await api.createEvent({
-      id: 0, // Server will assign the real ID
+      id: eventId,
       start_time: data.startISO,
       max_players: 4,
-      gender: 3, // co-ed
+      gender: 3,
       court: data.court,
       description: `Court ${data.court} booking`,
     })
@@ -59,12 +66,23 @@ export function BookingsProvider({ children }: { children: ReactNode }) {
       court: data.court,
       status: 'confirmed',
     }
+    
     setBookings([...bookings, newBooking])
     return newBooking
   }
 
+  const cancelBooking = async (id: number) => {
+    if (!user?.id) throw new Error('Must be logged in')
+    
+    // Call backend to remove player from event
+    await api.removePlayerFromEvent(id, user.id)
+    
+    // Update local state
+    setBookings(bookings.filter(b => b.id !== id))
+  }
+
   return (
-    <BookingsContext.Provider value={{ bookings, loadMine, createBooking }}>
+    <BookingsContext.Provider value={{ bookings, loadMine, createBooking, cancelBooking }}>
       {children}
     </BookingsContext.Provider>
   )

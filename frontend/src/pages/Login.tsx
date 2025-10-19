@@ -1,39 +1,22 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import '../styles/Login.css'
 import useUser from '../context/UserContext'
-import * as authService from '../services/auth'
+import '../styles/Login.css'
 
 export default function Login() {
-  const navigate = useNavigate()
-  const { setUser, setIsLoggedIn } = useUser()
-
-  const [loginId, setLoginId] = useState('')
+  const { login } = useUser()
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    
     try {
-      const player = await authService.login(loginId, password)
-      
-      setUser({
-        id: player.id,
-        username: loginId,
-        email: player.email,
-        firstName: player.fname,
-        lastName: player.lname,
-        birthday: player.bday,
-        phoneNo: player.phone,
-        rating: player.rating,
-        gender: player.gender === 1 ? 'male' : player.gender === 2 ? 'female' : 'non-binary',
-      })
-      setIsLoggedIn(true)
+      await login(username, password)
       navigate('/home')
     } catch (err: any) {
-      console.error('Login error:', err)
       setError(err.message || 'Login failed')
     }
   }
@@ -44,14 +27,14 @@ export default function Login() {
         <h1 className="login-title">DubRally 🎾</h1>
         <p className="login-subtitle">Login or create an account to get started</p>
 
-        {error && <div style={{ color: 'red', marginBottom: '1rem', padding: '0.5rem', background: '#fee', borderRadius: '4px' }}>{error}</div>}
+        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
 
         <form onSubmit={handleLogin} className="login-form">
           <input
             type="text"
             placeholder="Username"
-            value={loginId}
-            onChange={(e) => setLoginId(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="login-input"
             required
           />

@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fadeIn 0.6s ease-in;
 }
 .schedule-title {
   margin-bottom: 1rem;
@@ -195,4 +196,52 @@
 .confirm-btn:disabled {
   background: #c9c3dc;
   cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Disabled time slots */
+.times-item--disabled {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.times-item--disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Disabled courts */
+.court--disabled {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.court--disabled .court-rect {
+  fill: #9ca3af !important;
+}
+
+.court--disabled text {
+  fill: #6b7280 !important;
+  text-decoration: line-through;
+}
+
+.schedule-loading {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 1rem 0;
 }

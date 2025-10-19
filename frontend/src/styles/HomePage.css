@@ -3,6 +3,7 @@
   max-width: 1000px;
   margin: 0 auto;
   transition: opacity 0.4s ease, transform 0.4s ease;
+  animation: fadeIn 0.6s ease-in;
 }
 
 .home-header {
@@ -187,5 +188,17 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+.bookings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .bookings-grid {
+    grid-template-columns: 1fr;
   }
 }

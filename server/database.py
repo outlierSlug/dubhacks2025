@@ -129,6 +129,52 @@ class SQLiteDatabase(DataBase):
         except Exception as e:
             print(f"Error removing event: {e}")
             return False
+    def delete_event_by_id(self, event_id: int) -> bool:
+        """Deletes an event entirely from the database by ID"""
+        try:
+            cur = self.conn.cursor()
+            
+            # First delete all event_players entries (should already be done, but just in case)
+            cur.execute('DELETE FROM event_players WHERE event_id = ?', (event_id,))
+            
+            # Then delete the event itself
+            cur.execute('DELETE FROM events WHERE id = ?', (event_id,))
+            
+            rows_deleted = cur.rowcount
+            print(f"Deleted event {event_id}, rows affected: {rows_deleted}")
+            
+            self.conn.commit()
+            return rows_deleted > 0
+        except Exception as e:
+            print(f"Error removing event: {e}")
+            return False
+        
+    def remove_player_from_event(self, event_id: int, player_id: int) -> bool:
+        """Removes a player from an event by deleting from event_players table"""
+        try:
+            cur = self.conn.cursor()
+            
+            # Check if the relationship exists
+            cur.execute('''
+                SELECT * FROM event_players 
+                WHERE event_id = ? AND player_id = ?
+            ''', (event_id, player_id))
+            result = cur.fetchone()
+            
+            if not result:
+                return False
+            
+            # Delete the relationship
+            cur.execute('''
+                DELETE FROM event_players 
+                WHERE event_id = ? AND player_id = ?
+            ''', (event_id, player_id))
+            
+            self.conn.commit()
+            return cur.rowcount > 0
+        except Exception as e:
+            print(f"Error removing player from event: {e}")
+            return False
 
     def all_players(self) -> List[Player]:
         try:

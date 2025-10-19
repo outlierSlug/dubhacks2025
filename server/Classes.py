@@ -111,6 +111,16 @@ class DataBase(ABC):
         pass
 
     @abstractmethod
+    def delete_event_by_id(self, event_id: int) -> bool:
+        """Deletes an event from the database by ID"""
+        pass
+
+    @abstractmethod
+    def remove_player_from_event(self, event_id: int, player_id: int) -> bool:
+        """Removes a player from an event"""
+        pass
+
+    @abstractmethod
     def all_players(self) -> List[Player]:
         pass
 

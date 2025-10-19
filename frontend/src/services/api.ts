@@ -82,6 +82,19 @@ export async function addPlayerToEvent(eventId: number, playerId: number) {
   return res.json()
 }
 
+export async function removePlayerFromEvent(eventId: number, playerId: number) {
+  const res = await fetch(`${API_BASE}/api/events/${eventId}/remove_player`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ player_id: playerId }),
+  })
+  if (!res.ok) {
+    const err = await res.json()
+    throw new Error(err.detail || 'Failed to cancel booking')
+  }
+  return res.json()
+}
+
 export async function getRecommendations(playerId: number) {
   const res = await fetch(`${API_BASE}/api/recommendations/${playerId}`)
   if (!res.ok) throw new Error('Failed to get recommendations')

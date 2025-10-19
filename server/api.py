@@ -118,7 +118,7 @@ def get_player(username: str, password: str, db: DataBase = Depends(get_db)):
     """Gets a Player by account credentials"""
     pid = db.get_player_id(username, password)
     if pid is None:
-        raise HTTPException(status_code=404, detail="Username/Password not found")
+        raise HTTPException(status_code=404, detail="Incorrect username or password")
     player = next((p for p in db.all_players() if p.id == pid), None)
     if not player:
         raise HTTPException(status_code=500, detail="Player ID exists in accounts but not in player list - State Error")
@@ -173,17 +173,50 @@ def remove_player_from_event(event_id: int, update: EventPlayerUpdate, db: DataB
     player = db.get_player(update.player_id)
     if not player:
         raise HTTPException(status_code=404, detail=f"Player with id {update.player_id} not found")
-    for event in db.all_events():
-        if event.id == event_id:
-            if not db.remove_event(event):
-                raise HTTPException(status_code=500, detail="Failed to update event (remove step)")
-            if not event.remove_player(player):
-                db.add_event(event)
-                raise HTTPException(status_code=404, detail=f"Player with id {update.player_id} not found in event {event_id}")
-            if not db.add_event(event):
-                 raise HTTPException(status_code=500, detail="Failed to update event (add step)")
-            return EventResponse(**event.__dict__)
-    raise HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
+    
+    event = None
+    for ev in db.all_events():
+        if ev.id == event_id:
+            event = ev
+            break
+    
+    if not event:
+        raise HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
+    
+    # Check if player is in the event
+    if not any(p.id == update.player_id for p in event.players):
+        raise HTTPException(status_code=404, detail=f"Player with id {update.player_id} not found in event {event_id}")
+    
+    # Remove player from event_players table
+    if not db.remove_player_from_event(event_id, update.player_id):
+        raise HTTPException(status_code=500, detail="Failed to remove player from event")
+    
+    # Check if event has any players left
+    updated_event = None
+    for ev in db.all_events():
+        if ev.id == event_id:
+            updated_event = ev
+            break
+    
+    # If no players left, delete the event entirely
+    if updated_event and len(updated_event.players) == 0:
+        if not db.delete_event_by_id(event_id):  # Changed from remove_event
+            raise HTTPException(status_code=500, detail="Failed to delete empty event")
+        return EventResponse(
+            id=event_id,
+            start_time=event.start_time,
+            end_time=event.end_time,
+            max_players=event.max_players,
+            gender=event.gender,
+            court=event.court,
+            description=event.description
+        )
+    
+    # Return updated event
+    if updated_event:
+        return EventResponse(**updated_event.__dict__)
+    
+    raise HTTPException(status_code=404, detail=f"Event not found after removal")
 
 @app.get("/api/events", response_model=List[EventResponse])
 def get_all_events(db: DataBase = Depends(get_db)):
