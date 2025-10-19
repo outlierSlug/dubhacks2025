@@ -149,13 +149,18 @@ def new_player(info: NewPlayer, db: DataBase = Depends(get_db)):
         raise HTTPException(status_code=409, detail=f"Player with id {info.id} already exists.")
     return PlayerResponse(**player.__dict__)
 
-@app.get("/api/players/{player_id}", response_model=PlayerResponse)
-def get_player(player_id: int, username: str, password: str, db: DataBase = Depends(get_db)):
-    """Gets a Player by id and account credentials"""
-    player = db.get_player_id(username, password)
-    if not player or player.id != player_id:
-        raise HTTPException(status_code=404, detail="Username/Password not found or wrong player ID")
+@app.get("/api/player", response_model=PlayerResponse)
+def get_player(username: str, password: str, db: DataBase = Depends(get_db)):
+    """Gets a Player by account credentials"""
+    pid = db.get_player_id(username, password)
+    if pid is None:
+        raise HTTPException(status_code=404, detail="Username/Password not found")
+    player = next((p for p in db.all_players() if p.id == pid), None)
+    if not player:
+        raise HTTPException(status_code=500, detail="Player ID exists in accounts but not in player list - State Error")
+    
     return PlayerResponse(**player.__dict__)
+
 
 @app.patch("/api/players/{player_id}", response_model=PlayerResponse)
 def update_player_rating(player_id: int, rating_update: PlayerRatingUpdate, db: DataBase = Depends(get_db)):
