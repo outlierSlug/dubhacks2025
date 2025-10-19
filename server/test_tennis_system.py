@@ -157,6 +157,40 @@ def test_add_duplicate_username(db: SQLiteDatabase):
     # Try to create duplicate username (should fail due to UNIQUE constraint)
     assert not db.add_account("legend", "pass2", 13)
 
+def test_remove_account_existing(db: SQLiteDatabase):
+    player = Player(id=29, fname="Stan", lname="Wawrinka", rating=2400,
+                    email="stan@tennis.com", phone="555-8080",
+                    bday=date(1985, 3, 28), gender=1)
+    db.add_player(player)
+    db.add_account("stan_w", "password123", 29)
+
+    # Remove the account
+    assert db.remove_account("stan_w")
+
+    # Verify account is removed - authentication should fail
+    player_id = db.get_player_id("stan_w", "password123")
+    assert player_id is None
+
+def test_remove_account_nonexistent(db: SQLiteDatabase):
+    # Try to remove an account that doesn't exist
+    assert not db.remove_account("nonexistent_user")
+
+def test_remove_account_player_remains(db: SQLiteDatabase):
+    player = Player(id=30, fname="Dominic", lname="Thiem", rating=2380,
+                    email="dominic@tennis.com", phone="555-9090",
+                    bday=date(1993, 9, 3), gender=1)
+    db.add_player(player)
+    db.add_account("dominic_t", "password456", 30)
+
+    # Remove the account
+    assert db.remove_account("dominic_t")
+
+    # Verify player still exists (only account is removed)
+    retrieved_player = db.get_player(30)
+    assert retrieved_player is not None
+    assert retrieved_player.fname == "Dominic"
+    assert retrieved_player.lname == "Thiem"
+
 # Edge case tests
 def test_add_player_with_duplicate_id(db: SQLiteDatabase):
     player1 = Player(id=14, fname="Steffi", lname="Graf", rating=2400,

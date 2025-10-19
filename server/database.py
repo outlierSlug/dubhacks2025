@@ -190,6 +190,16 @@ class SQLiteDatabase(DataBase):
             print(f"Error creating account: {e}")
             return False
 
+    def remove_account(self, username: str) -> bool:
+        try:
+            cur = self.conn.cursor()
+            cur.execute('DELETE FROM users WHERE username = ?', (username,))
+            self.conn.commit()
+            return cur.rowcount > 0
+        except Exception as e:
+            print(f"Error removing account: {e}")
+            return False
+
     def _row_to_player(self, row) -> Player:
         from datetime import date
         return Player(

@@ -116,3 +116,7 @@ class DataBase(ABC):
     @abstractmethod
     def add_account(self, username: str, password: str, player_id) -> bool:
         pass
+
+    @abstractmethod
+    def remove_account(self, username: str) -> bool:
+        pass
