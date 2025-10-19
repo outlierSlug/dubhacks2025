@@ -48,6 +48,8 @@ export default function Schedule() {
   const [selectedCourt, setSelectedCourt] = useState<number | null>(null)
   const [bookedSlots, setBookedSlots] = useState<Map<string, Set<number>>>(new Map())
   const [loading, setLoading] = useState(false)
+const [isInitialLoad, setIsInitialLoad] = useState(true) // Add this
+
   const { createBooking } = useBookings()
   const { user } = useUser()
 
@@ -97,6 +99,7 @@ export default function Schedule() {
         console.error('Failed to fetch bookings:', error)
       } finally {
         setLoading(false)
+        setIsInitialLoad(false)
       }
     }
 
@@ -169,6 +172,14 @@ export default function Schedule() {
       console.error('Booking error:', error)
       alert(error.message || 'Failed to create booking')
     }
+  }
+
+  if (isInitialLoad) {
+    return (
+      <div className="schedule-box schedule-box--loading">
+        <div className="schedule-skeleton"></div>
+      </div>
+    )
   }
 
   return (
