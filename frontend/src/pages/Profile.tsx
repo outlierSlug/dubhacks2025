@@ -28,13 +28,18 @@ export default function Profile() {
         if (touched.skillLevel && !form?.skillLevel) 
             errs.skillLevel = 'Select a relative level';
 
-        if (touched.utrRating && form?.utrRating !== '') {
-            const utr = Number(form?.utrRating);
-            if (isNaN(utr)) errs.utrRating = 'UTR must be a number';
-            else if (utr < 1 || utr > 16.5) errs.utrRating = 'UTR must be between 1.00 and 16.50';
-            else if (Math.round(utr * 100) !== utr * 100) errs.utrRating = 'Use hundredths (e.g., 7.25)';
+        if (touched.utrRating && form.utrRating !== '') {
+            const utr = parseFloat(form.utrRating)
+            if (isNaN(utr)) errs.utrRating = 'UTR must be a number'
+            else if (utr < 1 || utr > 16.5) errs.utrRating = 'UTR must be between 1.00 and 16.50'
+            else {
+                // Check if it has more than 2 decimal places
+                const scaled = Math.round(utr * 100)
+                if (Math.abs(utr * 100 - scaled) > 0.0001) {
+                errs.utrRating = 'Use hundredths (e.g., 7.25)'
+                }
+            }
         }
-
         return errs;
     }, [form, touched]);
 

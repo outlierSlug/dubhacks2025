@@ -1,12 +1,14 @@
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TennisRating } from '../utils/TennisRating'
+import '../styles/Onboarding.css'
 import useUser from '../context/UserContext'
 
 export default function Onboarding() {
   const navigate = useNavigate()
   const { setUser, setIsLoggedIn } = useUser()
 
+  const handleBack = () => navigate('/')
   const [form, setForm] = useState({
     email: '',
     username: '',
@@ -63,10 +65,16 @@ export default function Onboarding() {
 
     // UTR validation (optional). If provided, must be number in [1.00, 16.50] with hundredths.
     if (touched.utrRating && form.utrRating !== '') {
-      const utr = Number(form.utrRating)
+      const utr = parseFloat(form.utrRating)
       if (isNaN(utr)) errs.utrRating = 'UTR must be a number'
       else if (utr < 1 || utr > 16.5) errs.utrRating = 'UTR must be between 1.00 and 16.50'
-      else if (Math.round(utr * 100) !== utr * 100) errs.utrRating = 'Use hundredths (e.g., 7.25)'
+      else {
+        // Check if it has more than 2 decimal places
+        const scaled = Math.round(utr * 100)
+        if (Math.abs(utr * 100 - scaled) > 0.0001) {
+          errs.utrRating = 'Use hundredths (e.g., 7.25)'
+        }
+      }
     }
 
     return errs
@@ -138,128 +146,189 @@ export default function Onboarding() {
     navigate('/home')
   }
 
-  const inputStyle = (fieldName: string) => ({
-    width: '100%',
-    padding: '0.75rem',
-    borderRadius: 8,
-    border: `1px solid ${errors[fieldName] ? 'crimson' : '#ccc'}`,
-  })
-
   return (
-    <div style={{ padding: '2rem', maxWidth: 600, margin: '0 auto', textAlign: 'left' }}>
-      <h1>Set up your DubRally account</h1>
-      <p style={{ color: '#666' }}>Create your login and tell us about your tennis experience.</p>
+    <div className="ob-container">
+      <button type="button" className="ob-back-btn" onClick={handleBack}>
+        ← Back to Login
+      </button>
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem', marginTop: '1.5rem' }}>
-        <fieldset style={{ border: '1px solid #eee', borderRadius: 8, padding: '1rem' }}>
+      <h1 className="ob-title">Set up your DubRally account</h1>
+      <p className="ob-subtitle">Create your login and tell us about your tennis experience.</p>
+
+      <form onSubmit={handleSubmit} className="ob-form">
+        <fieldset className="ob-fieldset">
           <legend>Account</legend>
 
           <div>
             <Label htmlFor="email" required>Email</Label>
-            <input id="email" placeholder="Email (username)" type="email" value={form.email} onChange={onChange('email')}
-              style={inputStyle('email')} />
-            {errors.email && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.email}</div>}
+            <input
+              id="email"
+              placeholder="Email (username)"
+              type="email"
+              value={form.email}
+              onChange={onChange('email')}
+              className={`ob-input ${errors.email ? 'ob-input-error' : ''}`}
+            />
+            {errors.email && <div className="ob-error">{errors.email}</div>}
           </div>
 
-          <div style={{ marginTop: 8 }}>
+          <div className="ob-field">
             <Label htmlFor="username" required>Username</Label>
-            <input id="username" placeholder="Choose a username" value={form.username} onChange={onChange('username')}
-              style={inputStyle('username')} />
-            {errors.username && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.username}</div>}
+            <input
+              id="username"
+              placeholder="Choose a username"
+              value={form.username}
+              onChange={onChange('username')}
+              className={`ob-input ${errors.username ? 'ob-input-error' : ''}`}
+            />
+            {errors.username && <div className="ob-error">{errors.username}</div>}
           </div>
 
-          <div style={{ marginTop: 8 }}>
+          <div className="ob-field">
             <Label htmlFor="password" required>Password</Label>
-            <input id="password" placeholder="Password" type="password" value={form.password} onChange={onChange('password')}
-              style={inputStyle('password')} />
-            {errors.password && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.password}</div>}
+            <input
+              id="password"
+              placeholder="Password"
+              type="password"
+              value={form.password}
+              onChange={onChange('password')}
+              className={`ob-input ${errors.password ? 'ob-input-error' : ''}`}
+            />
+            {errors.password && <div className="ob-error">{errors.password}</div>}
           </div>
 
-          <div style={{ marginTop: 8 }}>
+          <div className="ob-field">
             <Label htmlFor="confirmPassword" required>Confirm Password</Label>
-            <input id="confirmPassword" placeholder="Confirm Password" type="password" value={form.confirmPassword} onChange={onChange('confirmPassword')}
-              style={inputStyle('confirmPassword')} />
-            {errors.confirmPassword && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.confirmPassword}</div>}
+            <input
+              id="confirmPassword"
+              placeholder="Confirm Password"
+              type="password"
+              value={form.confirmPassword}
+              onChange={onChange('confirmPassword')}
+              className={`ob-input ${errors.confirmPassword ? 'ob-input-error' : ''}`}
+            />
+            {errors.confirmPassword && <div className="ob-error">{errors.confirmPassword}</div>}
           </div>
         </fieldset>
 
-        <fieldset style={{ border: '1px solid #eee', borderRadius: 8, padding: '1rem' }}>
+        <fieldset className="ob-fieldset">
           <legend>Profile</legend>
 
           <div>
             <Label htmlFor="studentId" required>Husky ID</Label>
-            <input id="studentId" placeholder="Husky ID" type="number" value={form.studentId} onChange={onChange('studentId')}
-              style={inputStyle('studentId')} />
-            {errors.studentId && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.studentId}</div>}
+            <input
+              id="studentId"
+              placeholder="Husky ID"
+              type="number"
+              value={form.studentId}
+              onChange={onChange('studentId')}
+              className={`ob-input ${errors.studentId ? 'ob-input-error' : ''}`}
+            />
+            {errors.studentId && <div className="ob-error">{errors.studentId}</div>}
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: 8 }}>
-            <div style={{ flex: 1 }}>
+          <div className="ob-row">
+            <div className="ob-col">
               <Label htmlFor="firstName" required>First Name</Label>
-              <input id="firstName" placeholder="First Name" value={form.firstName} onChange={onChange('firstName')}
-                style={inputStyle('firstName')} />
-              {errors.firstName && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.firstName}</div>}
+              <input
+                id="firstName"
+                placeholder="First Name"
+                value={form.firstName}
+                onChange={onChange('firstName')}
+                className={`ob-input ${errors.firstName ? 'ob-input-error' : ''}`}
+              />
+              {errors.firstName && <div className="ob-error">{errors.firstName}</div>}
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="ob-col">
               <Label htmlFor="lastName" required>Last Name</Label>
-              <input id="lastName" placeholder="Last Name" value={form.lastName} onChange={onChange('lastName')}
-                style={inputStyle('lastName')} />
-              {errors.lastName && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.lastName}</div>}
+              <input
+                id="lastName"
+                placeholder="Last Name"
+                value={form.lastName}
+                onChange={onChange('lastName')}
+                className={`ob-input ${errors.lastName ? 'ob-input-error' : ''}`}
+              />
+              {errors.lastName && <div className="ob-error">{errors.lastName}</div>}
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: 8 }}>
-            <div style={{ flex: 1 }}>
+          <div className="ob-row">
+            <div className="ob-col">
               <Label htmlFor="birthday" required>Birthday</Label>
-              <input id="birthday" placeholder="Birthday (YYYY-MM-DD)" type="date" value={form.birthday} onChange={onChange('birthday')}
-                style={inputStyle('birthday')} />
-              {errors.birthday && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.birthday}</div>}
+              <input
+                id="birthday"
+                placeholder="Birthday (YYYY-MM-DD)"
+                type="date"
+                value={form.birthday}
+                onChange={onChange('birthday')}
+                className={`ob-input ${errors.birthday ? 'ob-input-error' : ''}`}
+              />
+              {errors.birthday && <div className="ob-error">{errors.birthday}</div>}
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="ob-col">
               <Label htmlFor="gender" required>Gender</Label>
-              <select id="gender" value={form.gender} onChange={onChange('gender')}
-                style={inputStyle('gender')}>
+              <select
+                id="gender"
+                value={form.gender}
+                onChange={onChange('gender')}
+                className={`ob-input ${errors.gender ? 'ob-input-error' : ''}`}
+              >
                 <option value="">Select gender</option>
                 <option value="female">Female</option>
                 <option value="male">Male</option>
                 <option value="non-binary">Non-binary</option>
                 <option value="prefer-not-to-say">Prefer not to say</option>
               </select>
-              {errors.gender && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.gender}</div>}
+              {errors.gender && <div className="ob-error">{errors.gender}</div>}
             </div>
           </div>
 
-          <div style={{ marginTop: 8 }}>
+          <div className="ob-field">
             <Label htmlFor="phoneNo" required>Phone Number</Label>
-            <input id="phoneNo" placeholder="Phone Number" value={form.phoneNo} onChange={onChange('phoneNo')}
-              style={inputStyle('phoneNo')} />
-            {errors.phoneNo && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.phoneNo}</div>}
+            <input
+              id="phoneNo"
+              placeholder="Phone Number"
+              value={form.phoneNo}
+              onChange={onChange('phoneNo')}
+              className={`ob-input ${errors.phoneNo ? 'ob-input-error' : ''}`}
+            />
+            {errors.phoneNo && <div className="ob-error">{errors.phoneNo}</div>}
           </div>
         </fieldset>
 
-        <fieldset style={{ border: '1px solid #eee', borderRadius: 8, padding: '1rem' }}>
+        <fieldset className="ob-fieldset">
           <legend>Tennis</legend>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <div style={{ flex: 1 }}>
+          <div className="ob-row">
+            <div className="ob-col">
               <Label htmlFor="yearsExperience" required>Years of Experience</Label>
-              <input id="yearsExperience" placeholder="Years of Experience" type="number" value={form.yearsExperience} onChange={onChange('yearsExperience')}
-                style={inputStyle('yearsExperience')} />
-              {errors.yearsExperience && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.yearsExperience}</div>}
+              <input
+                id="yearsExperience"
+                placeholder="Years of Experience"
+                type="number"
+                value={form.yearsExperience}
+                onChange={onChange('yearsExperience')}
+                className={`ob-input ${errors.yearsExperience ? 'ob-input-error' : ''}`}
+              />
+              {errors.yearsExperience && <div className="ob-error">{errors.yearsExperience}</div>}
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="ob-col">
               <Label htmlFor="skillLevel" required>Relative Level</Label>
-              <select id="skillLevel" value={form.skillLevel} onChange={onChange('skillLevel')}
-                style={inputStyle('skillLevel')}>
+              <select
+                id="skillLevel"
+                value={form.skillLevel}
+                onChange={onChange('skillLevel')}
+                className={`ob-input ${errors.skillLevel ? 'ob-input-error' : ''}`}
+              >
                 <option value="">Select level</option>
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
                 <option value="advanced">Advanced</option>
               </select>
-              {errors.skillLevel && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.skillLevel}</div>}
+              {errors.skillLevel && <div className="ob-error">{errors.skillLevel}</div>}
             </div>
           </div>
 
-          <div style={{ marginTop: 8 }}>
+          <div className="ob-field">
             <Label htmlFor="utrRating">UTR (optional)</Label>
             <input
               id="utrRating"
@@ -270,36 +339,24 @@ export default function Onboarding() {
               max="16.5"
               value={form.utrRating}
               onChange={onChange('utrRating')}
-              style={inputStyle('utrRating')}
+              className={`ob-input ${errors.utrRating ? 'ob-input-error' : ''}`}
             />
-            {errors.utrRating && <div style={{ color: 'crimson', fontSize: '0.85rem', marginTop: 4 }}>{errors.utrRating}</div>}
+            {errors.utrRating && <div className="ob-error">{errors.utrRating}</div>}
           </div>
 
-          <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="ob-checkbox-group">
             <input
               type="checkbox"
               id="competitive"
               checked={form.hasPlayedCompetitive}
               onChange={onChange('hasPlayedCompetitive')}
-              style={{ width: 'auto' }}
+              className="ob-checkbox"
             />
             <label htmlFor="competitive">Have you played competitive tennis on a varsity team/club?</label>
           </div>
         </fieldset>
 
-        <button
-          type="submit"
-          disabled={hasErrors || !isComplete}
-          style={{
-            padding: '0.9rem',
-            borderRadius: 8,
-            background: (hasErrors || !isComplete) ? '#aaa' : '#4b2e83',
-            color: 'white',
-            border: 'none',
-            cursor: (hasErrors || !isComplete) ? 'not-allowed' : 'pointer',
-            fontWeight: 600
-          }}
-        >
+        <button type="submit" disabled={hasErrors || !isComplete} className="ob-submit-btn">
           Sign Up
         </button>
       </form>

@@ -1,0 +1,115 @@
+.ob-container {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.ob-back-btn {
+  background: transparent;
+  border: 1px solid #ddd;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #4b2e83;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.ob-back-btn:hover {
+  background: #f5f5f5;
+}
+
+.ob-title {
+  margin: 0 0 0.5rem;
+}
+
+.ob-subtitle {
+  color: #666;
+  margin: 0 0 1.5rem;
+}
+
+.ob-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.ob-fieldset {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.ob-label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.ob-required {
+  color: crimson;
+  margin-left: 4px;
+}
+
+.ob-field {
+  margin-top: 8px;
+}
+
+.ob-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 8px;
+}
+
+.ob-col {
+  flex: 1;
+}
+
+.ob-input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.ob-input-error {
+  border-color: crimson;
+}
+
+.ob-input:focus {
+  outline: none;
+  border-color: #4b2e83;
+}
+
+.ob-error {
+  color: crimson;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.ob-checkbox-group {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ob-checkbox {
+  width: auto;
+}
+
+.ob-submit-btn {
+  padding: 0.9rem;
+  border-radius: 8px;
+  background: #4b2e83;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ob-submit-btn:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}

@@ -16,14 +16,18 @@ export default function CalendarPicker({ value, onChange, minDate, className }: 
   }
 
   return (
-    <Calendar
-      onChange={handleChange}
-      value={value}
-      minDate={minDate}
-      className={className}
-      calendarType="gregory"   // Sunday-first
-      locale="en-US"
-      selectRange={false}
-    />
+    <>
+      <h3 className="panel-title">Date</h3>
+      {/* Sunday-first */}
+      <Calendar
+        onChange={handleChange}
+        value={value}
+        minDate={minDate}
+        className={className}
+        calendarType="gregory"
+        locale="en-US"
+        selectRange={false}
+      />
+    </>
   )
 }

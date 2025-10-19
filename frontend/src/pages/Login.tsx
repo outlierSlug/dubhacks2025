@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import  useUser from '../context/UserContext'
+import "../styles/Login.css"
 
 export default function Login() {
   const { setUser, setIsLoggedIn } = useUser()
@@ -24,34 +25,42 @@ export default function Login() {
   }
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '5rem' }}>
-      <h1>DubRally 🎾</h1>
-      <p>Login or create an account to get started</p>
+    <div className="login-container">
+      <div className="login-card">
+        <h1 className="login-title">DubRally 🎾</h1>
+        <p className="login-subtitle">Login or create an account to get started</p>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <input
-          type="text"
-          placeholder="Email or username"
-          value={loginId}
-          onChange={(e) => setLoginId(e.target.value)}
-          style={{ padding: '0.5rem', width: '220px' }}
-        />
-      </div>
-      <div>
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ padding: '0.5rem', width: '220px' }}
-        />
-      </div>
+        <form onSubmit={handleLogin} className="login-form">
+          <input
+            type="text"
+            placeholder="Email or username"
+            value={loginId}
+            onChange={(e) => setLoginId(e.target.value)}
+            className="login-input"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="login-input"
+            required
+          />
 
-      <div style={{ marginTop: '1.5rem' }}>
-        <button onClick={handleLogin}>Login</button>
-        <button onClick={handleSignup} style={{ marginLeft: '1rem' }}>
-          Sign Up
-        </button>
+          <div className="login-buttons">
+            <button type="submit" className="login-btn login-btn--primary">
+              Log in
+            </button>
+            <button
+              type="button"
+              onClick={handleSignup}
+              className="login-btn login-btn--secondary"
+            >
+              Sign Up
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
