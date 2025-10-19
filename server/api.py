@@ -3,71 +3,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 from Classes import Player, Event, DataBase
+import sqlite3
+from database import SQLiteDatabase, init_db, DB_NAME
 from datetime import date, datetime
 
 app = FastAPI()
 
-
 def get_db():
-    class MockDatabase(DataBase):
-        def __init__(self):
-            self._players: List[Player] = []
-            self._events: List[Event] = []
-            self._accounts: dict[str, tuple[str, int]] = {}  # username -> (password, player_id)
-
-        # --- Player methods ---
-        def add_player(self, player: Player) -> bool:
-            if any(p.id == player.id for p in self._players):
-                return False
-            self._players.append(player)
-            return True
-
-        def remove_player(self, player: Player) -> bool:
-            if player in self._players:
-                self._players.remove(player)
-                return True
-            return False
-
-        # --- Event methods ---
-        def add_event(self, event: Event) -> bool:
-            if any(e.id == event.id for e in self._events):
-                return False
-            self._events.append(event)
-            return True
-
-        def remove_event(self, event: Event) -> bool:
-            if event in self._events:
-                self._events.remove(event)
-                return True
-            return False
-
-        # --- Account methods ---
-        def add_account(self, username: str, password: str, player_id: int) -> bool:
-            if username in self._accounts:
-                return False
-            self._accounts[username] = (password, player_id)
-            return True
-
-        def get_player_id(self, username: str, password: str) -> Optional[Player]:
-            record = self._accounts.get(username)
-            if not record or record[0] != password:
-                return None
-            pid = record[1]
-            for player in self._players:
-                if player.id == pid:
-                    return player
-            return None
-
-        # --- Retrieval methods ---
-        def all_players(self) -> List[Player]:
-            return list(self._players)
-
-        def all_events(self) -> List[Event]:
-            return list(self._events)
-
+    """
+    Initializes and returns a singleton SQLite database instance.
+    Creates the database file and schema on first call.
+    """
     if not hasattr(get_db, "_instance"):
-        get_db._instance = MockDatabase()
-
+        # Create connection to SQLite database
+        conn = sqlite3.connect(DB_NAME, check_same_thread=False)
+        
+        # Initialize the database schema
+        init_db(conn)
+        
+        # Create the SQLiteDatabase instance
+        get_db._instance = SQLiteDatabase(conn)
+    
     return get_db._instance
 
 
@@ -115,6 +71,9 @@ class NewEventRequest(BaseModel):
 class PlayerRatingUpdate(BaseModel):
     rating: int
 
+class EventPlayerUpdate(BaseModel):
+    player_id: int
+
 class PlayerResponse(BaseModel):
     id: int
     fname: str
@@ -128,6 +87,7 @@ class PlayerResponse(BaseModel):
 class EventResponse(BaseModel):
     id: int
     start_time: datetime
+    end_time: datetime
     max_players: int
     gender: int
     court: int
@@ -149,7 +109,7 @@ def new_player(info: NewPlayer, db: DataBase = Depends(get_db)):
         raise HTTPException(status_code=409, detail=f"Player with id {info.id} already exists.")
     return PlayerResponse(**player.__dict__)
 
-@app.get("/api/player", response_model=PlayerResponse)
+@app.get("/api/players", response_model=PlayerResponse)
 def get_player(username: str, password: str, db: DataBase = Depends(get_db)):
     """Gets a Player by account credentials"""
     pid = db.get_player_id(username, password)
@@ -160,7 +120,6 @@ def get_player(username: str, password: str, db: DataBase = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Player ID exists in accounts but not in player list - State Error")
     
     return PlayerResponse(**player.__dict__)
-
 
 @app.patch("/api/players/{player_id}", response_model=PlayerResponse)
 def update_player_rating(player_id: int, rating_update: PlayerRatingUpdate, db: DataBase = Depends(get_db)):
@@ -185,4 +144,41 @@ def new_event(info: NewEventRequest, db: DataBase = Depends(get_db)):
         raise HTTPException(status_code=409, detail=f"Event with id {info.id} already exists.")
     return EventResponse(**event.__dict__)
 
+@app.patch("/api/events/{event_id}/add_player", response_model=EventResponse)
+def add_player_to_event(event_id: int, update: EventPlayerUpdate, db: DataBase = Depends(get_db)):
+    """Adds a player to a specific event."""
+    player = db.get_player(update.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail=f"Player with id {update.player_id} not found")
+    for event in db.all_events():
+        if event.id == event_id:
+            if not db.remove_event(event):
+                raise HTTPException(status_code=500, detail="Failed to update event (remove step)")
+            try:
+                event.add_player(player)
+            except PermissionError as e:
+                db.add_event(event) 
+                raise HTTPException(status_code=409, detail=str(e))
+            if not db.add_event(event):
+                raise HTTPException(status_code=500, detail="Failed to update event (add step)")
+            return EventResponse(**event.__dict__)
+    raise HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
 
+
+@app.patch("/api/events/{event_id}/remove_player", response_model=EventResponse)
+def remove_player_from_event(event_id: int, update: EventPlayerUpdate, db: DataBase = Depends(get_db)):
+    """Removes a player from a specific event."""
+    player = db.get_player(update.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail=f"Player with id {update.player_id} not found")
+    for event in db.all_events():
+        if event.id == event_id:
+            if not db.remove_event(event):
+                raise HTTPException(status_code=500, detail="Failed to update event (remove step)")
+            if not event.remove_player(player):
+                db.add_event(event)
+                raise HTTPException(status_code=404, detail=f"Player with id {update.player_id} not found in event {event_id}")
+            if not db.add_event(event):
+                 raise HTTPException(status_code=500, detail="Failed to update event (add step)")
+            return EventResponse(**event.__dict__)
+    raise HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
