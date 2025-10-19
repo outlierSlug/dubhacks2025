@@ -7,6 +7,8 @@ import sqlite3
 from database import SQLiteDatabase, init_db, DB_NAME
 from datetime import date, datetime
 
+RATING_WINDOW = 5
+
 app = FastAPI()
 
 def get_db():
@@ -103,10 +105,12 @@ def read_root():
 def new_player(info: NewPlayer, db: DataBase = Depends(get_db)):
     """Adds a new Player"""
     player = Player(info.id, info.fname, info.lname, info.rating, info.email, info.phone, info.bday, info.gender)
+    if db.get_player(info.id) is not None:
+        raise HTTPException(status_code=409, detail=f"Player with id {info.id} already exists.")
     if not db.add_account(info.username, info.password, info.id):
         raise HTTPException(status_code=409, detail=f"Username already exists!")
     if not db.add_player(player):
-        raise HTTPException(status_code=409, detail=f"Player with id {info.id} already exists.")
+        raise HTTPException(status_code=500, detail=f"Server Broken")
     return PlayerResponse(**player.__dict__)
 
 @app.get("/api/players", response_model=PlayerResponse)
@@ -230,8 +234,8 @@ def get_event_recommendations(player_id: int, db: DataBase = Depends(get_db)):
         min_rating = min(player_ratings)
         max_rating = max(player_ratings)
         
-        lower_bound = min_rating - 5
-        upper_bound = max_rating + 5
+        lower_bound = min_rating - RATING_WINDOW
+        upper_bound = max_rating + RATING_WINDOW
         
         # 3. Check if player's rating is within the range
         if lower_bound <= player.rating <= upper_bound:
