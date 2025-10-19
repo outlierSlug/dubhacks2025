@@ -86,6 +86,10 @@ class DataBase(ABC):
         pass
 
     @abstractmethod
+    def player_exists(id: int) -> bool:
+        pass
+
+    @abstractmethod
     def remove_player(self, player: Player) -> bool:
         pass
 
