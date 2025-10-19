@@ -1,11 +1,17 @@
-from enum import Enum
 from typing import List
 from datetime import date, datetime, timedelta
 from abc import ABC, abstractmethod
 
 DURATION = 1 # Hours
+
+"""
+    MENS = 1
+    WOMENS = 2
+    CO_ED = 3
+"""
+
 class Player():
-    def __init__(self, id: int = None, fname: str = None, lname: str = None, rating: int = None, email: str = None, phone: str = None, bday: date = None, gender: int = None):
+    def __init__(self, id: int, fname: str, lname: str, rating: int, email: str, phone: str, bday: date, gender: int):
         self.id = id
         self.fname = fname
         self.lname = lname
@@ -58,6 +64,9 @@ class Event():
         """Raises error if event is full"""
         if len(self.players) == self.max_players:
             raise PermissionError("This event is locked - no more sign-ups allowed")
+        elif self.gender < 3 and (player.gender != self.gender):
+            gender = "MENS" if self.gender == 1 else "WOMENS" if self.gender == 2 else "CO-ED"
+            raise PermissionError(f"This Event is marked as {gender}!")
         self.players.append(player)
 
     def remove_player(self, player: Player) -> bool:
