@@ -61,6 +61,7 @@ class Account(BaseModel):
     password: str
 
 class NewEventRequest(BaseModel):
+    id: int
     start_time: datetime
     max_players: int
     gender: int
@@ -138,7 +139,7 @@ def update_player_rating(player_id: int, rating_update: PlayerRatingUpdate, db: 
 @app.post("/api/events", status_code=201, response_model=EventResponse)
 def new_event(info: NewEventRequest, db: DataBase = Depends(get_db)):
     """Creates a new event."""
-    event = Event(None, info.start_time, info.max_players, info.gender, info.court, info.description)
+    event = Event(info.id, info.start_time, info.max_players, info.gender, info.court, info.description)
     if not db.add_event(event): # add_event sets the id
         raise HTTPException(status_code=409, detail=f"Event with id {info.id} already exists.")
     return EventResponse(**event.__dict__)
