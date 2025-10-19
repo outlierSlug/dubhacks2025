@@ -21,6 +21,16 @@ class Player():
         self.bday = bday
         self.gender = gender
 
+    def __eq__(self, other):
+        """Compare players by their ID"""
+        if isinstance(other, Player):
+            return self.id == other.id
+        return False
+
+    def __hash__(self):
+        """Make Player hashable based on ID"""
+        return hash(self.id)
+
     def change_name(self, fname: str, lname: str):
         self.fname = fname
         self.lname = lname
@@ -30,7 +40,7 @@ class Player():
 
     def change_email(self, email: str):
         self.email = email
-    
+
     def change_phone(self, phone: str):
         self.phone = phone
 
@@ -39,7 +49,7 @@ class Player():
 
     def update_rating(self, rating: int):
         self.rating = rating
-    
+
     def get_age(self):
         today = date.today()
         age = today.year - self.bday.year - ((today.month, today.day) < (self.bday.month, self.bday.day))
@@ -89,6 +99,9 @@ class DataBase(ABC):
     def remove_player(self, player: Player) -> bool:
         pass
 
+    @abstractmethod
+    def update_player_rating(self, player_id: int, new_rating: int) -> bool:
+        pass
     @abstractmethod
     def add_event(self, event: Event) -> bool:
         pass

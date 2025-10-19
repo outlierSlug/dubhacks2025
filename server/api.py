@@ -131,14 +131,12 @@ def update_player_rating(player_id: int, rating_update: PlayerRatingUpdate, db: 
     Updates the rating for a specific player.
     Finds the player by their ID from the URL path.
     """
-    players = db.all_players()
-    for player in players:
-        if player.id == player_id:
-            db.remove_player(player)
-            player.rating = rating_update.rating
-            db.add_player(player)
-            return PlayerResponse(**player.__dict__)
-    raise HTTPException(status_code=404, detail=f"Player with id {player_id} not found")
+    if not db.update_player_rating(player_id, rating_update.rating):
+            raise HTTPException(status_code=404, detail=f"Player with id {player_id} not found")
+
+    # Fetch and return the updated player
+    player = db.get_player(player_id)
+    return PlayerResponse(**player.__dict__)
 
 @app.post("/api/events", status_code=201, response_model=EventResponse)
 def new_event(info: NewEventRequest, db: DataBase = Depends(get_db)):

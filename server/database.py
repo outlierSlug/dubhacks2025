@@ -90,6 +90,16 @@ class SQLiteDatabase(DataBase):
             print(f"Error removing player: {e}")
             return False
 
+    def update_player_rating(self, player_id: int, new_rating: int) -> bool:
+        try: 
+            cur = self.conn.cursor()
+            cur.execute('UPDATE players SET rating = ? WHERE id = ?', (new_rating, player_id))
+            self.conn.commit()
+            return cur.rowcount > 0
+        except Exception as e: 
+            print(f"Error updating player rating: {e}")
+            return False
+
     def add_event(self, event: Event) -> bool:
         try:
             cur = self.conn.cursor()
@@ -100,7 +110,8 @@ class SQLiteDatabase(DataBase):
                   event.max_players, event.gender, event.court, event.description))
 
             for player in event.players:
-                cur.execute('INSERT INTO event_players (event_id, player_id) VALUES (?, ?)',
+                # Use INSERT OR IGNORE to avoid UNIQUE constraint violations
+                cur.execute('INSERT OR IGNORE INTO event_players (event_id, player_id) VALUES (?, ?)',
                           (event.id, player.id))
 
             self.conn.commit()
