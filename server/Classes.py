@@ -1,17 +1,17 @@
-from enum import Enum
 from typing import List
 from datetime import date, datetime, timedelta
+from abc import ABC, abstractmethod
 
 DURATION = 1 # Hours
 
-class Gender(Enum):
+"""
     MENS = 1
     WOMENS = 2
     CO_ED = 3
-
+"""
 
 class Player():
-    def __init__(self, id: int, fname: str, lname: str, rating: int, email: str, phone: str, bday: date, gender: Gender):
+    def __init__(self, id: int, fname: str, lname: str, rating: int, email: str, phone: str, bday: date, gender: int):
         self.id = id
         self.fname = fname
         self.lname = lname
@@ -34,8 +34,8 @@ class Player():
     def change_phone(self, phone: str):
         self.phone = phone
 
-    def change_gender(self, gender: Gender):
-        self.gender = Gender
+    def change_gender(self, gender: int):
+        self.gender = gender
 
     def update_rating(self, rating: int):
         self.rating = rating
@@ -47,14 +47,15 @@ class Player():
 
 
 class Event():
-    def init(self, start_time: datetime, max_players: int, gender: Gender, court: int, description: str):
+    def __init__(self, id: int, start_time: datetime, max_players: int, gender: int, court: int, description: str):
+        self.id = id
         self.start_time = start_time
         self.duration = timedelta(hours = DURATION)
-        self.end_time = self.start_time + self.duration 
+        self.end_time = self.start_time + self.duration
 
         self.players: List[Player] = []
         self.max_players = max_players
-        
+
         self.gender = gender
         self.court = court
         self.description = description
@@ -64,7 +65,8 @@ class Event():
         if len(self.players) == self.max_players:
             raise PermissionError("This event is locked - no more sign-ups allowed")
         elif self.gender < 3 and (player.gender != self.gender):
-            raise PermissionError(f"This Event is marked as {self.gender}!")
+            gender = "MENS" if self.gender == 1 else "WOMENS" if self.gender == 2 else "CO-ED"
+            raise PermissionError(f"This Event is marked as {gender}!")
         self.players.append(player)
 
     def remove_player(self, player: Player) -> bool:
@@ -75,12 +77,31 @@ class Event():
         return False
     
 
-    
-    
-    
+class DataBase(ABC):
+    @abstractmethod
+    def __init__(self):
+        pass
 
-    
-    
+    @abstractmethod
+    def add_player(self, player: Player) -> bool:
+        pass
 
+    @abstractmethod
+    def remove_player(self, player: Player) -> bool:
+        pass
 
-      
+    @abstractmethod
+    def add_event(self, event: Event) -> bool:
+        pass
+
+    @abstractmethod
+    def remove_event(self, event: Event) -> bool:
+        pass
+
+    @abstractmethod
+    def all_players(self) -> List[Player]:
+        pass
+
+    @abstractmethod
+    def all_events(self) -> List[Event]:
+        pass
