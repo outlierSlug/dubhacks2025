@@ -110,7 +110,8 @@ class SQLiteDatabase(DataBase):
                   event.max_players, event.gender, event.court, event.description))
 
             for player in event.players:
-                cur.execute('INSERT INTO event_players (event_id, player_id) VALUES (?, ?)',
+                # Use INSERT OR IGNORE to avoid UNIQUE constraint violations
+                cur.execute('INSERT OR IGNORE INTO event_players (event_id, player_id) VALUES (?, ?)',
                           (event.id, player.id))
 
             self.conn.commit()
