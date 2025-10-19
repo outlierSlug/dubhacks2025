@@ -37,7 +37,7 @@ def init_db(conn):
     """ Creates the Events table """
     cur.execute('''
     CREATE TABLE IF NOT EXISTS events (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY,
         start_time TEXT NOT NULL,
         end_time TEXT NOT NULL,
         max_players INTEGER NOT NULL,
@@ -94,11 +94,10 @@ class SQLiteDatabase(DataBase):
         try:
             cur = self.conn.cursor()
             cur.execute('''
-                INSERT INTO events (start_time, end_time, max_players, gender, court, description)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (event.start_time.isoformat(), event.end_time.isoformat(),
+                INSERT INTO events (id, start_time, end_time, max_players, gender, court, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (event.id, event.start_time.isoformat(), event.end_time.isoformat(),
                   event.max_players, event.gender, event.court, event.description))
-            event.id = cur.lastrowid
 
             for player in event.players:
                 cur.execute('INSERT INTO event_players (event_id, player_id) VALUES (?, ?)',

@@ -7,6 +7,8 @@ import sqlite3
 from database import SQLiteDatabase, init_db, DB_NAME
 from datetime import date, datetime
 
+RATING_WINDOW = 5
+
 app = FastAPI()
 
 def get_db():
@@ -103,10 +105,12 @@ def read_root():
 def new_player(info: NewPlayer, db: DataBase = Depends(get_db)):
     """Adds a new Player"""
     player = Player(info.id, info.fname, info.lname, info.rating, info.email, info.phone, info.bday, info.gender)
+    if db.get_player(info.id) is not None:
+        raise HTTPException(status_code=409, detail=f"Player with id {info.id} already exists.")
     if not db.add_account(info.username, info.password, info.id):
         raise HTTPException(status_code=409, detail=f"Username already exists!")
     if not db.add_player(player):
-        raise HTTPException(status_code=409, detail=f"Player with id {info.id} already exists.")
+        raise HTTPException(status_code=500, detail=f"Server Broken")
     return PlayerResponse(**player.__dict__)
 
 @app.get("/api/players", response_model=PlayerResponse)
@@ -140,7 +144,7 @@ def update_player_rating(player_id: int, rating_update: PlayerRatingUpdate, db: 
 def new_event(info: NewEventRequest, db: DataBase = Depends(get_db)):
     """Creates a new event."""
     event = Event(info.id, info.start_time, info.max_players, info.gender, info.court, info.description)
-    if not db.add_event(event):
+    if not db.add_event(event): # add_event sets the id
         raise HTTPException(status_code=409, detail=f"Event with id {info.id} already exists.")
     return EventResponse(**event.__dict__)
 
@@ -182,3 +186,60 @@ def remove_player_from_event(event_id: int, update: EventPlayerUpdate, db: DataB
                  raise HTTPException(status_code=500, detail="Failed to update event (add step)")
             return EventResponse(**event.__dict__)
     raise HTTPException(status_code=404, detail=f"Event with id {event_id} not found")
+
+@app.get("/api/events", response_model=List[EventResponse])
+def get_all_events(db: DataBase = Depends(get_db)):
+    """Fetches all events from the database."""
+    events = db.all_events()
+    return events
+
+@app.get("/api/recommendations/{player_id}", response_model=List[EventResponse])
+def get_event_recommendations(player_id: int, db: DataBase = Depends(get_db)):
+    """
+    Recommends events for a player based on the rating range of
+    players already in the event.
+    """
+    # 1. Get the player
+    player = db.get_player(player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail=f"Player with id {player_id} not found")
+
+    recommended_events = []
+    all_events = db.all_events()
+
+    # 2. Loop through all events
+    for event in all_events:
+        
+        # --- Filter out ineligible events first ---
+
+        # Skip if event is full
+        if len(event.players) >= event.max_players:
+            continue
+
+        # Skip if player is already in the event
+        if player in event.players:
+            continue
+
+        # Skip if gender doesn't match
+        if event.gender < 3 and event.gender != player.gender:
+            continue
+        
+        # If the event is empty, recommend it
+        if not event.players:
+            recommended_events.append(event)
+            continue
+            
+        # If the event has players, calculate the range
+        player_ratings = [p.rating for p in event.players]
+        min_rating = min(player_ratings)
+        max_rating = max(player_ratings)
+        
+        lower_bound = min_rating - RATING_WINDOW
+        upper_bound = max_rating + RATING_WINDOW
+        
+        # 3. Check if player's rating is within the range
+        if lower_bound <= player.rating <= upper_bound:
+            recommended_events.append(event)
+
+    # 4. Return the list
+    return recommended_events
