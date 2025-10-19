@@ -3,6 +3,7 @@ import type { ReactNode, Dispatch, SetStateAction } from 'react'
 
 type User = {
   email?: string
+  username?: string
   password?: string
   name?: string
   firstName?: string
@@ -16,6 +17,7 @@ type User = {
   skillLevel?: 'beginner' | 'intermediate' | 'advanced'
   hasPlayedCompetitive?: boolean
   utrRating?: number
+  rating?: number
 }
 
 interface UserContextType {

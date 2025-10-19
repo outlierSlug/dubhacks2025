@@ -1,0 +1,198 @@
+/* Layout */
+.schedule-box {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.schedule-title {
+  margin-bottom: 1rem;
+}
+.schedule-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+.calendar-wrapper {
+  flex: 0 0 auto;
+}
+.panel {
+  min-width: 260px;
+}
+.panel-courts {
+  min-width: 220px;
+}
+.panel-title {
+  margin: 0 0 0.5rem 0;
+}
+
+/* Calendar */
+.tennis-calendar {
+  width: 350px;
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid #a0a096;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+}
+.tennis-calendar .react-calendar__tile abbr {
+  color: inherit;
+}
+.tennis-calendar .react-calendar__tile {
+  color: #111;
+  border-radius: 6px;
+}
+.tennis-calendar .react-calendar__tile:enabled:hover,
+.tennis-calendar .react-calendar__tile:enabled:focus {
+  background: #ece6f6;
+  color: #111;
+}
+.tennis-calendar .react-calendar__tile--now {
+  background: #fffbe6;
+  color: #111;
+  font-weight: 600;
+}
+.tennis-calendar .react-calendar__tile--active {
+  background: #4b2e83; /* UW purple */
+  color: #fff;
+}
+
+/* Hover/focus (non-selected only) */
+.tennis-calendar .react-calendar__tile:enabled:hover:not(.react-calendar__tile--active),
+.tennis-calendar .react-calendar__tile:enabled:focus:not(.react-calendar__tile--active) {
+  background: #ece6f6;
+  color: #111;
+}
+
+/* Selected day stays purple even on hover/focus */
+.tennis-calendar .react-calendar__tile--active,
+.tennis-calendar .react-calendar__tile--active:enabled:hover,
+.tennis-calendar .react-calendar__tile--active:enabled:focus {
+  background: #4b2e83; /* UW purple */
+  color: #fff;
+}
+
+/* Selected AND Today stays purple on hover/focus */
+.tennis-calendar .react-calendar__tile--now.react-calendar__tile--active,
+.tennis-calendar .react-calendar__tile--now.react-calendar__tile--active:enabled:hover,
+.tennis-calendar .react-calendar__tile--now.react-calendar__tile--active:enabled:focus {
+  background: #4b2e83;
+  color: #fff;
+}
+
+/* Times list */
+.times-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+.times-item {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #fff;
+  transition: background-color 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+  user-select: none;
+}
+
+.times-item:hover {
+  background: #f7f6fb;
+  border-color: #bbb;
+}
+
+/* Hover only when NOT selected */
+.times-item:enabled:hover:not(.times-item--selected),
+.times-item:enabled:focus-visible:not(.times-item--selected) {
+  background: #f7f6fb;
+  border-color: #bbb;
+}
+
+/* Selected state overrides hover/focus immediately */
+.times-item--selected,
+.times-item--selected:enabled:hover,
+.times-item--selected:enabled:focus,
+.times-item--selected:enabled:active {
+  background: #4b2e83;       /* UW purple */
+  border-color: #4b2e83;
+  color: #fff;
+}
+
+/* Courts grid and court "images" */
+.courts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.court {
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  border-radius: 6px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.court svg {
+  display: block;
+  margin: 0 auto;
+  border-radius: 6px;
+}
+.court--idle .court-rect {
+  fill: #9bdc72;
+  stroke: #5da83a;
+  stroke-width: 2;
+}
+.court--selected {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+.court--selected .court-rect {
+  fill: #1e90ff;
+  stroke: #1760b3;
+  stroke-width: 2;
+}
+.court svg text {
+  fill: #fff;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+/* Prominent booking summary */
+.selection-summary {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 1100px;
+  background: #f2effa;                 /* light purple */
+  border: 1px solid #d6cdee;
+  border-left: 4px solid #4b2e83;      /* accent bar */
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.selection-summary p {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Confirm button */
+.confirm-btn {
+  margin-left: auto;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: #4b2e83;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.confirm-btn:disabled {
+  background: #c9c3dc;
+  cursor: not-allowed;
+}

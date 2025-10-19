@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { TennisRating } from '../utils/TennisRating'
 import useUser from '../context/UserContext'
 
 export default function Onboarding() {
@@ -101,6 +102,20 @@ export default function Onboarding() {
     const birthdayDate = new Date(form.birthday)
     const age = Math.floor((Date.now() - birthdayDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25))
 
+    // Map skillLevel string -> numeric 1-3 for the rating algorithm
+    const skillMap = { beginner: 1, intermediate: 2, advanced: 3 } as const
+    const skillNumeric = skillMap[form.skillLevel as keyof typeof skillMap]
+
+    const yearsPlayed = Number(form.yearsExperience)
+    const utr = form.utrRating ? parseFloat(Number(form.utrRating).toFixed(2)) : undefined
+
+    const rating = TennisRating.calculate({
+      utr,
+      skillLevel: skillNumeric,
+      yearsPlayed,
+      hasCompExperience: form.hasPlayedCompetitive,
+    })
+
     setUser({
       email: form.email,
       username: form.username,
@@ -113,10 +128,11 @@ export default function Onboarding() {
       age,
       gender: form.gender,
       phoneNo: form.phoneNo,
-      yearsExperience: Number(form.yearsExperience),
+      yearsExperience: yearsPlayed,
       skillLevel: form.skillLevel as 'beginner' | 'intermediate' | 'advanced',
       hasPlayedCompetitive: form.hasPlayedCompetitive,
-      utrRating: form.utrRating ? parseFloat(Number(form.utrRating).toFixed(2)) : undefined,
+      utrRating: utr,
+      rating, // save calculated rating
     })
     setIsLoggedIn(true)
     navigate('/home')
