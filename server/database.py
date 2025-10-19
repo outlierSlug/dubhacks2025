@@ -90,6 +90,16 @@ class SQLiteDatabase(DataBase):
             print(f"Error removing player: {e}")
             return False
 
+    def update_player_rating(self, player_id: int, new_rating: int) -> bool:
+        try: 
+            cur = self.conn.cursor()
+            cur.execute('UPDATE players SET rating = ? WHERE id = ?', (new_rating, player_id))
+            self.conn.commit()
+            return cur.rowcount > 0
+        except Exception as e: 
+            print(f"Error updating player rating: {e}")
+            return False
+
     def add_event(self, event: Event) -> bool:
         try:
             cur = self.conn.cursor()
