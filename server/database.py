@@ -14,7 +14,7 @@ def init_db(conn):
     """ Creates the Players table """
     cur.execute('''
     CREATE TABLE IF NOT EXISTS players (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        id INTEGER PRIMARY KEY,
         fname TEXT NOT NULL,
         lname TEXT NOT NULL,
         rating INTEGER,
@@ -72,9 +72,9 @@ class SQLiteDatabase(DataBase):
         try:
             cur = self.conn.cursor()
             cur.execute('''
-                INSERT INTO players (fname, lname, rating, email, phone, bday, gender)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (player.fname, player.lname, player.rating, player.email,
+                INSERT INTO players (id, fname, lname, rating, email, phone, bday, gender)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (player.id, player.fname, player.lname, player.rating, player.email,
                   player.phone, player.bday.isoformat(), player.gender))
             player.id = cur.lastrowid
             self.conn.commit()
@@ -154,8 +154,7 @@ class SQLiteDatabase(DataBase):
         except Exception as e:
             print(f"Error fetching events: {e}")
             return []
-    
-    # ... your _row_to_player and _row_to_event methods remain the same ...
+        
     def _row_to_player(self, row) -> Player:
         from datetime import date
         return Player(
@@ -170,13 +169,13 @@ class SQLiteDatabase(DataBase):
         )
 
     def _row_to_event(self, row) -> Event:
-        event = Event()
-        event.id = row[0]
-        event.start_time = datetime.fromisoformat(row[1])
-        event.end_time = datetime.fromisoformat(row[2])
-        event.max_players = row[3]
-        event.gender = row[4]
-        event.court = row[5]
-        event.description = row[6]
+        event = Event(
+            id=row[0],
+            start_time=datetime.fromisoformat(row[1]),
+            max_players=row[3],
+            gender=row[4],
+            court=row[5],
+            description=row[6]
+        )
         event.players = []
         return event

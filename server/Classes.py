@@ -45,7 +45,6 @@ class Player():
         age = today.year - self.bday.year - ((today.month, today.day) < (self.bday.month, self.bday.day))
         return age
 
-
 class Event():
     def __init__(self, id: int, start_time: datetime, max_players: int, gender: int, court: int, description: str):
         self.id = id
@@ -104,4 +103,16 @@ class DataBase(ABC):
 
     @abstractmethod
     def all_events(self) -> List[Event]:
+        pass
+
+    @abstractmethod
+    def get_player(self, id: int) -> Player:
+        pass
+
+    @abstractmethod
+    def get_player_id(self, username: str, password: str) -> int:
+        pass
+
+    @abstractmethod
+    def add_account(self, username: str, password: str, player_id) -> bool:
         pass
