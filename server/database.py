@@ -1,5 +1,3 @@
-# database.py
-
 import sqlite3
 from typing import List
 from datetime import datetime
@@ -76,7 +74,6 @@ class SQLiteDatabase(DataBase):
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (player.id, player.fname, player.lname, player.rating, player.email,
                   player.phone, player.bday.isoformat(), player.gender))
-            player.id = cur.lastrowid
             self.conn.commit()
             return True
         except Exception as e:
@@ -154,7 +151,45 @@ class SQLiteDatabase(DataBase):
         except Exception as e:
             print(f"Error fetching events: {e}")
             return []
-        
+
+    def get_player(self, id: int) -> Player:
+        try:
+            cur = self.conn.cursor()
+            cur.execute('SELECT * FROM players WHERE id = ?', (id,))
+            row = cur.fetchone()
+            if row:
+                return self._row_to_player(row)
+            return None
+        except Exception as e:
+            print(f"Error fetching player: {e}")
+            return None
+
+    def get_player_id(self, username: str, password: str) -> int:
+        try:
+            cur = self.conn.cursor()
+            cur.execute('SELECT player_id FROM users WHERE username = ? AND password = ?',
+                      (username, password))
+            row = cur.fetchone()
+            if row:
+                return row[0]
+            return None
+        except Exception as e:
+            print(f"Error authenticating user: {e}")
+            return None
+
+    def add_account(self, username: str, password: str, player_id) -> bool:
+        try:
+            cur = self.conn.cursor()
+            cur.execute('''
+                INSERT INTO users (username, password, player_id)
+                VALUES (?, ?, ?)
+            ''', (username, password, player_id))
+            self.conn.commit()
+            return True
+        except Exception as e:
+            print(f"Error creating account: {e}")
+            return False
+
     def _row_to_player(self, row) -> Player:
         from datetime import date
         return Player(
