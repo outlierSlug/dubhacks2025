@@ -90,7 +90,7 @@ class DataBase(ABC):
         pass
 
     @abstractmethod
-    def update_player(self, player: Player) -> bool:
+    def update_player_rating(self, player_id: int, new_rating: int) -> bool:
         pass
     @abstractmethod
     def add_event(self, event: Event) -> bool:
