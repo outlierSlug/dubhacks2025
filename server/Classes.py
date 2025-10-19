@@ -47,11 +47,11 @@ class Player():
 
 
 class Event():
-    def __init__(self, start_time: datetime = None, max_players: int = None, gender: int = None, court: int = None, description: str = None):
-        self.id = None
+    def __init__(self, id: int, start_time: datetime, max_players: int, gender: int, court: int, description: str):
+        self.id = id
         self.start_time = start_time
-        self.duration = timedelta(hours = DURATION) if start_time else None
-        self.end_time = self.start_time + self.duration if start_time else None
+        self.duration = timedelta(hours = DURATION)
+        self.end_time = self.start_time + self.duration
 
         self.players: List[Player] = []
         self.max_players = max_players
