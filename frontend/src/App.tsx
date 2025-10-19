@@ -1,34 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom'
+import Login from './pages/Login'
+import HomePage from './pages/HomePage'
+import Schedule from './pages/Schedule'
+import Matchmaking from './pages/Matchmaking'
+import Profile from './pages/Profile'
+import Onboarding from './pages/Onboarding'
+import useUser from './context/UserContext'
 import './App.css'
 
+
 function App() {
-  const [count, setCount] = useState(0)
+  const {isLoggedIn} = useUser(); // Local state for now, will hook up to backend 
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Router>
+      {isLoggedIn && (<nav className="nav">
+          <Link to="/home">Home</Link>
+          <Link to="/schedule">Schedule</Link>
+          <Link to="/matchmaking">Matchmaking</Link>
+          <Link to="/profile">Profile</Link>
+        </nav>
+      )}
+      
+      <Routes>
+        <Route path="/" element={isLoggedIn ? <Navigate to="/home" /> : <Login />} />
+        <Route path="/onboarding" element={<Onboarding />} />
+        
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/schedule" element={<Schedule />} />
+        <Route path="/matchmaking" element={<Matchmaking />} />
+        <Route path="/profile" element={<Profile />} />
+        
+        <Route path="*" element={<div style={{ padding: '2rem' }}>404 - Not Found</div>} />
+      </Routes>
+    </Router>
   )
 }
 
