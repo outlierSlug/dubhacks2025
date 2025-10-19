@@ -4,11 +4,31 @@ import CalendarPicker from '../components/CalendarPicker'
 import TimeSlots from '../components/TimeSlots'
 import CourtPicker from '../components/CourtPicker'
 import BookingSummary from '../components/BookingSummary'
+import useBookings from '../context/BookingsContext'
+import useUser from '../context/UserContext'
+
+// Helper function to convert "6:00 AM" to ISO datetime string
+function toStartISO(date: Date, timeSlot: string): string {
+  const [time, meridiem] = timeSlot.split(' ')
+  const [hours, minutes] = time.split(':').map(Number)
+  
+  // Convert to 24-hour format
+  let hour24 = hours === 12 ? 0 : hours
+  if (meridiem === 'PM' && hours !== 12) {
+    hour24 += 12
+  }
+  
+  const dt = new Date(date)
+  dt.setHours(hour24, minutes || 0, 0, 0)
+  return dt.toISOString()
+}
 
 export default function Schedule() {
   const [date, setDate] = useState(new Date())
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const [selectedCourt, setSelectedCourt] = useState<number | null>(null)
+  const { createBooking } = useBookings()
+  const { user } = useUser()
 
   const timeSlots = [
     '6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM',
@@ -18,14 +38,12 @@ export default function Schedule() {
 
   const courts = [1, 2, 3, 4, 5, 6]
 
-  // When the date changes, reset selections
   const handleDateChange = (d: Date) => {
     setDate(d)
     setSelectedSlot(null)
     setSelectedCourt(null)
   }
 
-  // Toggle selection in parent so children stay presentational
   const handleTimeSelect = (slot: string | null) => {
     setSelectedSlot((prev) => (prev === slot ? null : slot))
   }
@@ -34,20 +52,28 @@ export default function Schedule() {
     setSelectedCourt((prev) => (prev === court ? null : court))
   }
 
-  const canConfirm = Boolean(selectedSlot && selectedCourt)
+  const canConfirm = Boolean(user && selectedSlot && selectedCourt)
 
   const handleConfirm = async () => {
-    if (!canConfirm) return
-    const booking = {
-      dateISO: date.toISOString(),
-      dateLabel: date.toLocaleDateString(),
-      timeSlot: selectedSlot!,
-      court: selectedCourt!,
+    if (!canConfirm || !user || !selectedSlot) return
+    
+    try {
+      const startISO = toStartISO(date, selectedSlot)
+      const created = await createBooking({
+        startISO,
+        timeSlot: selectedSlot,
+        court: selectedCourt!,
+      })
+      console.log('Booking created:', created)
+      alert(`Booking confirmed for ${selectedSlot} on court ${selectedCourt}`)
+      
+      // Reset selections after booking
+      setSelectedSlot(null)
+      setSelectedCourt(null)
+    } catch (error: any) {
+      console.error('Booking error:', error)
+      alert(error.message || 'Failed to create booking')
     }
-    // TODO: Replace with real API call to save booking
-    // await fetch('/api/bookings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(booking) })
-    console.log('Booking confirmed:', booking)
-    alert(`Booked court ${booking.court} at ${booking.timeSlot} on ${booking.dateLabel}`)
   }
 
   return (

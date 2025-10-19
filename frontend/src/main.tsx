@@ -3,11 +3,14 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { UserProvider } from './context/UserContext.tsx'
+import { BookingsProvider } from './context/BookingsContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <UserProvider>
+      <BookingsProvider>
       <App />
+      </BookingsProvider>
     </UserProvider>
   </StrictMode>,
 )

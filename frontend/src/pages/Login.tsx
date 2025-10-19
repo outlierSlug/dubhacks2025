@@ -1,27 +1,41 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import  useUser from '../context/UserContext'
-import "../styles/Login.css"
+import '../styles/Login.css'
+import useUser from '../context/UserContext'
+import * as authService from '../services/auth'
 
 export default function Login() {
-  const { setUser, setIsLoggedIn } = useUser()
-  const [loginId, setLoginId] = useState('') // email or username
-  const [password, setPassword] = useState('')
   const navigate = useNavigate()
+  const { setUser, setIsLoggedIn } = useUser()
 
-  const handleLogin = () => {
-    const isEmail = loginId.includes('@')
-    setUser({
-      email: isEmail ? loginId : undefined,
-      username: !isEmail ? loginId : undefined,
-      password,
-    })
-    setIsLoggedIn(true)
-    navigate('/home')
-  }
+  const [loginId, setLoginId] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
-  const handleSignup = () => {
-    navigate('/onboarding')
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    
+    try {
+      const player = await authService.login(loginId, password)
+      
+      setUser({
+        id: player.id,
+        username: loginId,
+        email: player.email,
+        firstName: player.fname,
+        lastName: player.lname,
+        birthday: player.bday,
+        phoneNo: player.phone,
+        rating: player.rating,
+        gender: player.gender === 1 ? 'male' : player.gender === 2 ? 'female' : 'non-binary',
+      })
+      setIsLoggedIn(true)
+      navigate('/home')
+    } catch (err: any) {
+      console.error('Login error:', err)
+      setError(err.message || 'Login failed')
+    }
   }
 
   return (
@@ -30,10 +44,12 @@ export default function Login() {
         <h1 className="login-title">DubRally 🎾</h1>
         <p className="login-subtitle">Login or create an account to get started</p>
 
+        {error && <div style={{ color: 'red', marginBottom: '1rem', padding: '0.5rem', background: '#fee', borderRadius: '4px' }}>{error}</div>}
+
         <form onSubmit={handleLogin} className="login-form">
           <input
             type="text"
-            placeholder="Email or username"
+            placeholder="Username"
             value={loginId}
             onChange={(e) => setLoginId(e.target.value)}
             className="login-input"
@@ -54,7 +70,7 @@ export default function Login() {
             </button>
             <button
               type="button"
-              onClick={handleSignup}
+              onClick={() => navigate('/onboarding')}
               className="login-btn login-btn--secondary"
             >
               Sign Up

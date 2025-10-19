@@ -191,6 +191,16 @@ def get_all_events(db: DataBase = Depends(get_db)):
     events = db.all_events()
     return events
 
+@app.get("/api/events/mine/{player_id}", response_model=List[EventResponse])
+def get_my_events(player_id: int, db: DataBase = Depends(get_db)):
+    """Return events that the given player is currently in."""
+    mine = []
+    for ev in db.all_events():
+        if any(p.id == player_id for p in ev.players):
+            mine.append(ev)
+    return mine
+
+
 @app.get("/api/recommendations/{player_id}", response_model=List[EventResponse])
 def get_event_recommendations(player_id: int, db: DataBase = Depends(get_db)):
     """
